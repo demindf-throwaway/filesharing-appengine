@@ -67,7 +67,8 @@ public class Database {
 	}
 
 	static void deleteFile(Long id) {
-		ofy().delete().type(FileEntity.class).id(id).now();
+		FileEntity file = ofy().load().type(FileEntity.class).id(id).now();
+		ofy().delete().keys(file.chunkHashes.getKey(), file.peerList.getKey(), Key.create(file)).now();
 	}
 	
 	static Long putUser(User user) {

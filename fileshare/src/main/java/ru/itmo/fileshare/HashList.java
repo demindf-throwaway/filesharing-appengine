@@ -19,4 +19,10 @@ public class HashList {
 		}
 		return true;
 	}
+	
+	public HashList() {}
+	
+	public HashList(byte[] chunkHashes) {
+		this.chunkHashes = chunkHashes;
+	}
 }
