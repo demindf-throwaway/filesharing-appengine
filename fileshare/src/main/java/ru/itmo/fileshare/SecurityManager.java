@@ -153,6 +153,16 @@ public class SecurityManager {
 				}
 			}
 		});
+		
+		registerRequestChecker("ConnectToPeer", new RequestChecker() {
+			@Override
+			public void check(RequestParameters p)
+					throws SecurityError {
+				if (!checkUser(p.getLong("userId"), p.getString("userSecret"))) {
+					throw new SecurityError("User is not authorized");
+				}
+			}
+		});
 	}
 	
 	private static void checkFileAccess(Long fileId, RequestParameters p)

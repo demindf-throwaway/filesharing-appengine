@@ -43,6 +43,7 @@ public class SubscribeToFileServlet extends FileshareServlet {
 		if (peerType == null) {
 			throw new RequestException("Invalid peerType value");
 		}		
+		// TODO: notify other peers
 		Database.connect(userId, fileId, peerType);
 		return null;
 	}

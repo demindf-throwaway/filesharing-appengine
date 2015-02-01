@@ -33,6 +33,7 @@ public class UnsubscribeFromFile extends FileshareServlet {
 			throw new RequestException("fileId parameter is required");
 		}
 		Database.disconnect(userId, fileId);
+		// TODO: notify other peers
 		return null;
 	}
 }

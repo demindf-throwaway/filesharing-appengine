@@ -46,10 +46,10 @@ public class AddFileServlet extends FileshareServlet {
 			if (id == null) {
 				throw new ServletException("Database return null id for added file");
 			}
+			// TODO: Add seed
 			Map<String, String> result = new HashMap<String, String>();
 			result.put("fileId", id.toString());
 			return new HashMap<String, String>();
-			
 		} catch (DatabaseException e) {
 			throw new ServletException("Logic error: couldn't add file to database", e);
 		}
