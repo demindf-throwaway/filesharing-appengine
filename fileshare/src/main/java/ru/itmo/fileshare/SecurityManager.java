@@ -125,7 +125,16 @@ public class SecurityManager {
 				}
 				checkFileAccess(fileId, p);
 			}
-			
+		});
+		
+		registerRequestChecker("UnsubscribeFromFile", new RequestChecker() {
+			@Override
+			public void check(RequestParameters p)
+					throws SecurityError {
+				if (!checkUser(p.getLong("userId"), p.getString("userSecret"))) {
+					throw new SecurityError("User is not authorized");
+				}
+			}			
 		});
 	}
 	
