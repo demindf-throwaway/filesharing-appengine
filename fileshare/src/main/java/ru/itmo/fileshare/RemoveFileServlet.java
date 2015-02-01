@@ -5,8 +5,19 @@ import java.util.Map;
 
 import javax.servlet.ServletException;
 
+/*
+ * Parameters:
+ *   fileId
+ * Returns:
+ *   null
+ */
 public class RemoveFileServlet extends FileshareServlet {
 	private static final long serialVersionUID = 1L;
+
+	@Override
+	protected String getMethodName() {
+		return "RemoveFile";
+	}
 
 	@Override
 	protected Map<?, ?> processRequest(RequestParameters p)
@@ -16,10 +27,5 @@ public class RemoveFileServlet extends FileshareServlet {
 			throw new ServletException("Database can't delete file. It's probably doesn't exist");
 		}
 		return null;
-	}
-
-	@Override
-	protected String getMethodName() {
-		return "RemoveFile";
 	}
 }
