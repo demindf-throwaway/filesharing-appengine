@@ -8,7 +8,7 @@ import java.util.Map;
 import javax.servlet.ServletException;
 
 /*
- * POST parameters:
+ * Parameters:
  *   userId
  *   userSecret
  *   filename
@@ -24,6 +24,11 @@ import javax.servlet.ServletException;
 public class AddFileServlet extends FileshareServlet {
 	private static final long serialVersionUID = 1L;
 	
+	@Override
+	protected String getMethodName() {
+		return "AddFile";
+	}
+
 	@Override
 	protected Map<?, ?> processRequest(RequestParameters p)
 			throws ServletException, IOException, RequestException {
@@ -48,10 +53,5 @@ public class AddFileServlet extends FileshareServlet {
 		} catch (DatabaseException e) {
 			throw new ServletException("Logic error: couldn't add file to database", e);
 		}
-	}
-
-	@Override
-	protected String getMethodName() {
-		return "AddFile";
 	}
 }
