@@ -91,7 +91,7 @@ public class Database {
 	}
 	
 	static void connect(final Long userId, final Long fileId, final PeerList.PeerType peerType) {
-		if (userId == null || fileId == null) {
+		if (userId == null || fileId == null || peerType == null) {
 			throw new NullPointerException();
 		}
 		ofy().transact(new VoidWork() {	

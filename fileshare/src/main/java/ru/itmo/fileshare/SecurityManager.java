@@ -108,31 +108,52 @@ public class SecurityManager {
 				if (fileId == null) {
 					throw new SecurityError("fileId parameter is required");
 				}
-				FileEntity file = Database.getFile(fileId);
-				if (file == null) {
-					throw new SecurityError("File does not exist");
-				}
-				// If no password then file is for everyone
-				if (file.password == null) {
-					return;
-				}
-				// Owner can always access his files
-				if (checkUser(p.getLong("userId"), p.getString("userSecret"))
-						&& p.getLong("userId") == file.owner.getKey().getId()) {
-					return;
-				}
-				// If passwords match, then allow access
-				if (file.verifyPassword(p.getString("password"))) {
-					return;
-				}
-				// If admin passwords match, then allow access
-				if (file.verifyAdminPassword(p.getString("adminPassword"))) {
-					return;
-				}
-				// This person can't be allowed to view this file
-				throw new SecurityException("Access forbiden: you must be the owner of file or provide correct password");
+				checkFileAccess(fileId, p);
 			}
 		});
+		
+		registerRequestChecker("SubscribeToFile", new RequestChecker() {
+			@Override
+			public void check(RequestParameters p)
+					throws SecurityError {
+				if (!checkUser(p.getLong("userId"), p.getString("userSecret"))) {
+					throw new SecurityError("User is not authorized");
+				}
+				Long fileId = p.getLong("fileId");
+				if (fileId == null) {
+					throw new SecurityError("fileId parameter is required");
+				}
+				checkFileAccess(fileId, p);
+			}
+			
+		});
+	}
+	
+	private static void checkFileAccess(Long fileId, RequestParameters p)
+			throws SecurityError {
+		FileEntity file = Database.getFile(fileId);
+		if (file == null) {
+			throw new SecurityError("File does not exist");
+		}
+		// If no password then file is for everyone
+		if (file.password == null) {
+			return;
+		}
+		// Owner can always access his files
+		if (checkUser(p.getLong("userId"), p.getString("userSecret"))
+				&& p.getLong("userId") == file.owner.getKey().getId()) {
+			return;
+		}
+		// If passwords match, then allow access
+		if (file.verifyPassword(p.getString("password"))) {
+			return;
+		}
+		// If admin passwords match, then allow access
+		if (file.verifyAdminPassword(p.getString("adminPassword"))) {
+			return;
+		}
+		// This person can't be allowed to view this file
+		throw new SecurityException("Access forbiden: you must be the owner of file or provide correct password");
 	}
 
 	private static void checkFile(String filename, Long totalSize, Long pieceSize, FileItem chunkHashes)

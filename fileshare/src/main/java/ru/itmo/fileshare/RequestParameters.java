@@ -46,4 +46,12 @@ public class RequestParameters extends HashMap<String, FileItem> {
 			return null;
 		}
 	}
+	
+	public Boolean getBoolean(String name) {
+		String b = getString(name);
+		if (b == null) {
+			return null;
+		}
+		return Boolean.parseBoolean(b);
+	}
 }

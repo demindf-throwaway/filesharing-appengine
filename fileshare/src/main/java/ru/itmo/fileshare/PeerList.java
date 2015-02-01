@@ -15,7 +15,22 @@ public class PeerList {
 	
 	static enum PeerType {
 		seed, // Seeds don't receive updates when peer comes online/offline
-		leech // Leechers track who is online
+		leech; // Leechers track who is online
+
+		public static PeerType fromString(String str) {
+			if (str == null) {
+				return null;
+			}
+			PeerType result;
+			if (str == "seed") {
+				result = seed;
+			} else if (str == "leech") {
+				result = leech;
+			} else {
+				result = null;
+			}
+			return result;
+		}
 	}
 	
 	static public class Element {
