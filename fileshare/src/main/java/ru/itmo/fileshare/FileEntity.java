@@ -27,11 +27,19 @@ public class FileEntity {
 	Ref<HashList> chunkHashes;
 	Ref<PeerList> peerList;
 	
-	public boolean verifyAdminPassword(String password) {
-		if (password == null || adminPassword == null) {
+	
+	public boolean verifyPassword(String password) {
+		if (password == null || this.password == null) {
 			return false;
 		}
-		return password.equals(adminPassword);
+		return password.equals(this.password);
+	}
+
+	public boolean verifyAdminPassword(String password) {
+		if (password == null || this.adminPassword == null) {
+			return false;
+		}
+		return password.equals(this.adminPassword);
 	}
 	
 	void setOwnerId(Long id) {
