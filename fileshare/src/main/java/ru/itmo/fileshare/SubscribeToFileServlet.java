@@ -13,7 +13,6 @@ import javax.servlet.ServletException;
  *   peerType (seed/leech)
  *   (opt) password
  *   (opt) adminPassword
- *   (opt) userSecret
  * Returns:
  *   null
  */
@@ -35,10 +34,6 @@ public class SubscribeToFileServlet extends FileshareServlet {
 		Long fileId = p.getLong("fileId");
 		if (fileId == null) {
 			throw new RequestException("fileId parameter is required");
-		}
-		FileEntity file = Database.getFile(fileId);
-		if (file == null) {
-			throw new RequestException("File does not exist");
 		}
 		String strPeerType = p.getString("receiveUpdates");
 		if (strPeerType == null) {
