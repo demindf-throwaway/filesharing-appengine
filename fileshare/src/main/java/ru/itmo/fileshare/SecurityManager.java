@@ -74,7 +74,6 @@ public class SecurityManager {
 						|| !checkPasswordStrength(p.getString("adminPassword"), true)) {
 					throw new SecurityError("Weak password");
 				}
-				
 			}
 		});
 		
@@ -136,6 +135,24 @@ public class SecurityManager {
 				}
 			}			
 		});
+		
+		registerRequestChecker("SetPassword", new RequestChecker() {
+			@Override
+			public void check(RequestParameters p)
+					throws SecurityError {
+				Long fileId = p.getLong("fileId");
+				if (fileId == null) {
+					throw new SecurityError("fileId parameter is required");
+				}
+				if (!checkAdminFileAccess(fileId, p)) {
+					throw new SecurityError("Admin access is not authorized");
+				}
+				if (!checkPasswordStrength(p.getString("password"), false)
+						|| !checkPasswordStrength(p.getString("adminPassword"), true)) {
+					throw new SecurityError("Weak password");
+				}
+			}
+		});
 	}
 	
 	private static void checkFileAccess(Long fileId, RequestParameters p)
@@ -148,23 +165,31 @@ public class SecurityManager {
 		if (file.password == null) {
 			return;
 		}
-		// Owner can always access his files
-		if (checkUser(p.getLong("userId"), p.getString("userSecret"))
-				&& p.getLong("userId") == file.owner.getKey().getId()) {
+		if (checkAdminFileAccess(fileId, p)) {
 			return;
 		}
 		// If passwords match, then allow access
 		if (file.verifyPassword(p.getString("password"))) {
 			return;
 		}
-		// If admin passwords match, then allow access
-		if (file.verifyAdminPassword(p.getString("adminPassword"))) {
-			return;
-		}
 		// This person can't be allowed to view this file
 		throw new SecurityException("Access forbiden: you must be the owner of file or provide correct password");
 	}
-
+	
+	private static boolean checkAdminFileAccess(Long fileId, RequestParameters p) {
+		// Owner can always access his files
+		FileEntity file = Database.getFile(fileId);
+		if (checkUser(p.getLong("userId"), p.getString("userSecret"))
+				&& p.getLong("userId") == file.owner.getKey().getId()) {
+			return true;
+		}
+		// If admin passwords match, then allow access
+		if (file.verifyAdminPassword(p.getString("adminPassword"))) {
+			return true;
+		}
+		return false;
+	}
+	
 	private static void checkFile(String filename, Long totalSize, Long pieceSize, FileItem chunkHashes)
 			throws SecurityError {
 		if (filename == null || totalSize == null || pieceSize == null || chunkHashes == null || chunkHashes.isFormField()) {
@@ -182,18 +207,3 @@ public class SecurityManager {
 	}
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
