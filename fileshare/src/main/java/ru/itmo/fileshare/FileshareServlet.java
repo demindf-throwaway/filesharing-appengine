@@ -1,9 +1,6 @@
 package ru.itmo.fileshare;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -11,11 +8,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.json.simple.JSONObject;
+
+import ru.itmo.fileshare.SecurityManager.SecurityError;
 
 class RequestException extends Exception {
 	private static final long serialVersionUID = 1L;
@@ -30,55 +26,41 @@ public abstract class FileshareServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
-	protected Map<String, FileItem> prepareParameters(HttpServletRequest request) throws FileUploadException {
-		Map<String, FileItem> parameters = new HashMap<>();
-		List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request);
-		for (FileItem item: items) {
-			parameters.put(item.getFieldName(), item);
-		}
-		return parameters;
-	}
+	protected abstract String getMethodName();
+
+	protected abstract Map<?, ?> processRequest(RequestParameters parameters)
+			throws ServletException, IOException, RequestException;
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		JSONObject jsonResponse = new JSONObject();
 		try {
-			Map<?, ?> result = processRequest(prepareParameters(request));
-			jsonResponse.put("status", "OK");
-			jsonResponse.put("result", result);
-		} catch (RequestException | FileUploadException e) {
-			jsonResponse.put("status", "ERROR");
-			jsonResponse.put("result", null);
-			jsonResponse.put("error_description", e.getMessage());
+			RequestParameters parameters = new RequestParameters(request);
+			SecurityManager.checkRequest(getMethodName(), parameters);
+			Map<?, ?> result = processRequest(parameters);
+			writeOkResponse(response, result);
+		} catch (RequestException | FileUploadException | SecurityError e) {
+			writeErrorResponse(response, e.getMessage());
 		}
-		PrintWriter writer = response.getWriter();
-		jsonResponse.writeJSONString(writer);
 	}
 
-	protected abstract Map<?, ?> processRequest(Map<String, FileItem> parameters)
-		throws ServletException, IOException, RequestException;
-	
-	protected String getString(FileItem item) {
-		if (item == null) {
-			return null;
-		}
-		if (item.isFormField()) {
-			return item.getString();
-		}
-		return null;
+// Private
+	@SuppressWarnings("unchecked")
+	private void writeErrorResponse(HttpServletResponse response, String message)
+			throws IOException {
+		JSONObject jsonResponse = new JSONObject();
+		jsonResponse.put("status", "ERROR");
+		jsonResponse.put("result", null);
+		jsonResponse.put("error_description", message);
+		jsonResponse.writeJSONString(response.getWriter());
 	}
-	
-	protected Long getLong(FileItem item) {
-		String number = getString(item);
-		if (number == null) {
-			return null;
-		}
-		try {
-			return Long.parseLong(number);
-		} catch (NumberFormatException e) {
-			return null;
-		}
+
+	@SuppressWarnings("unchecked")
+	private void writeOkResponse(HttpServletResponse response, Map<?, ?> result)
+			throws IOException {
+		JSONObject jsonResponse = new JSONObject();
+		jsonResponse.put("status", "OK");
+		jsonResponse.put("result", result);
+		jsonResponse.writeJSONString(response.getWriter());
 	}
 }

@@ -27,6 +27,13 @@ public class FileEntity {
 	Ref<HashList> chunkHashes;
 	Ref<PeerList> peerList;
 	
+	public boolean verifyAdminPassword(String password) {
+		if (password == null || adminPassword == null) {
+			return false;
+		}
+		return password.equals(adminPassword);
+	}
+	
 	void setOwnerId(Long id) {
 		owner = Ref.create(Key.create(User.class, id));
 	}
